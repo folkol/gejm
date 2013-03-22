@@ -3,6 +3,7 @@ package com.folkol.gejm;
 import java.awt.FontFormatException;
 import java.awt.Frame;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
@@ -11,15 +12,20 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferStrategy;
+import java.awt.image.BufferedImage;
+import java.awt.image.VolatileImage;
+import java.io.File;
 import java.io.IOException;
 
+import javax.imageio.ImageIO;
+
 public abstract class Game implements KeyListener {
-    
-    public Game() {
+
+    public void init() {
         int numBuffers = 2;
         GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
         GraphicsDevice device = env.getDefaultScreenDevice();
-        GraphicsConfiguration gc = device.getDefaultConfiguration();
+        gc = device.getDefaultConfiguration();
         mainFrame = new Frame(gc);
         mainFrame.setUndecorated(true);
         mainFrame.setIgnoreRepaint(true);
@@ -29,45 +35,67 @@ public abstract class Game implements KeyListener {
         mainFrame.addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(WindowEvent winEv) {
                 running = false;
-                mainFrame.setVisible(false);
-                mainFrame.dispose();
             }
         });
     }
-    
-    public void run() {
+
+    public VolatileImage loadImage(String string) {
+        BufferedImage imageFromFile = null;
         try {
-            while(running) {
-                long before = System.currentTimeMillis();
-                BufferStrategy bufferStrategy = mainFrame.getBufferStrategy();
-                if(bufferStrategy == null) continue;
-                Graphics g = bufferStrategy.getDrawGraphics();
-                if (!bufferStrategy.contentsLost()) {
-                    renderFrame(mainFrame.getBounds(), g);
-                    bufferStrategy.show();
-                    long elapsed = System.currentTimeMillis() - before;
-                    System.out.println("FPS: " + 1 / (elapsed / 1000.0f));
-                    g.dispose();
-                } else {
-                    System.out.println("Content's lost");
-                }
+            imageFromFile = ImageIO.read(new File(string));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        VolatileImage vImg = gc.createCompatibleVolatileImage(imageFromFile.getWidth(), imageFromFile.getHeight());
+        do {
+            if (vImg.validate(gc) == VolatileImage.IMAGE_INCOMPATIBLE) {
+                vImg = gc.createCompatibleVolatileImage(imageFromFile.getWidth(), imageFromFile.getHeight());
+            }
+            Graphics2D g = vImg.createGraphics();
+
+            g.drawImage(imageFromFile, 0, 0, null);
+
+            g.dispose();
+        } while (vImg.contentsLost());
+        return vImg;
+    }
+
+    public void run() {
+        mainFrame.setVisible(true);
+
+        BufferStrategy strategy = mainFrame.getBufferStrategy();
+        try {
+            while (running) {
+                do {
+                    do {
+                        Graphics graphics = strategy.getDrawGraphics();
+                        renderFrame(mainFrame.getBounds(), graphics);
+                        graphics.dispose();
+                    } while (strategy.contentsRestored());
+
+                    strategy.show();
+                } while (strategy.contentsLost());
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        mainFrame.setVisible(false);
+        mainFrame.dispose();
     }
-    
+
     protected Frame mainFrame;
     protected boolean running = true;
+    private GraphicsConfiguration gc;
 
     abstract protected void renderFrame(Rectangle bounds, Graphics g) throws FontFormatException, IOException;
-    
+
     public void keyReleased(KeyEvent e) {
-        
+
     }
-     
+
     public void keyTyped(KeyEvent e) {
-        
+
     }
 
     public void keyPressed(KeyEvent arg0) {
