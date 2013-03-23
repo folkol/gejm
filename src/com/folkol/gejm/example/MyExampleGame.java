@@ -2,37 +2,35 @@ package com.folkol.gejm.example;
 
 import java.awt.Color;
 import java.awt.FontFormatException;
-import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Rectangle;
-import java.awt.image.VolatileImage;
 import java.io.IOException;
-import java.util.Random;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.folkol.gejm.Game;
 
 public class MyExampleGame extends Game {
 
-    private VolatileImage image;
+    private List<Animation> animations = new ArrayList<Animation>();
 
     @Override
     public void init() {
         super.init();
-        image = loadImage("resources/images/test.png");
+        for (int i = 0; i < 5; i++) {
+            animations.add(loadAnimation("hero"));
+        }
     };
 
     @Override
-    protected void renderFrame(Rectangle bounds, Graphics g) throws FontFormatException, IOException {
+    protected void renderFrame(Rectangle bounds, Graphics2D g) throws FontFormatException, IOException {
         // Draw scene
         g.setColor(Color.BLUE);
         g.fillRect(0, 0, bounds.width, bounds.height);
 
-        int frame = (int) (System.currentTimeMillis() / 100 % 6);
-        Random random = new Random();
-        for (int i = 0; i < 10000; i++) {
-            int x = random.nextInt((int) bounds.getWidth() - 50);
-            int y = random.nextInt((int) bounds.getHeight() - 100);
-            
-            g.drawImage(image, x, y, x + 50, y + 100, 51 * frame, 0, 51 + 51 * frame, 100, null);
+        for (Animation a : animations) {
+            a.update();
+            a.draw(g);
         }
 
         g.setColor(Color.ORANGE);

@@ -2,7 +2,6 @@ package com.folkol.gejm;
 
 import java.awt.FontFormatException;
 import java.awt.Frame;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsDevice;
@@ -12,12 +11,9 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferStrategy;
-import java.awt.image.BufferedImage;
-import java.awt.image.VolatileImage;
-import java.io.File;
 import java.io.IOException;
 
-import javax.imageio.ImageIO;
+import com.folkol.gejm.example.Animation;
 
 public abstract class Game implements KeyListener {
 
@@ -31,6 +27,7 @@ public abstract class Game implements KeyListener {
         mainFrame.setIgnoreRepaint(true);
         device.setFullScreenWindow(mainFrame);
         mainFrame.createBufferStrategy(numBuffers);
+        
         mainFrame.addKeyListener(this);
         mainFrame.addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(WindowEvent winEv) {
@@ -38,25 +35,10 @@ public abstract class Game implements KeyListener {
             }
         });
     }
-
-    public VolatileImage loadImage(String string) {
-        BufferedImage imageFromFile = null;
-        try {
-            imageFromFile = ImageIO.read(new File(string));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        VolatileImage vImg = gc.createCompatibleVolatileImage(imageFromFile.getWidth(), imageFromFile.getHeight());
-        do {
-            if (vImg.validate(gc) == VolatileImage.IMAGE_INCOMPATIBLE) {
-                vImg = gc.createCompatibleVolatileImage(imageFromFile.getWidth(), imageFromFile.getHeight());
-            }
-            Graphics2D g = vImg.createGraphics();
-            g.drawImage(imageFromFile, 0, 0, null);
-
-            g.dispose();
-        } while (vImg.contentsLost());
-        return vImg;
+    
+    public Animation loadAnimation(String name) {
+        Animation a = new Animation(name);
+        return a;
     }
 
     public void run() {
@@ -68,11 +50,10 @@ public abstract class Game implements KeyListener {
                 long currentTimeMillis = System.currentTimeMillis();
                 do {
                     do {
-                        Graphics graphics = strategy.getDrawGraphics();
+                        Graphics2D graphics = (Graphics2D) strategy.getDrawGraphics();
                         renderFrame(mainFrame.getBounds(), graphics);
                         graphics.dispose();
                     } while (strategy.contentsRestored());
-
                     strategy.show();
                 } while (strategy.contentsLost());
                 long elapsed = System.currentTimeMillis() - currentTimeMillis;
@@ -93,7 +74,7 @@ public abstract class Game implements KeyListener {
     protected boolean running = true;
     private GraphicsConfiguration gc;
 
-    abstract protected void renderFrame(Rectangle bounds, Graphics g) throws FontFormatException, IOException;
+    abstract protected void renderFrame(Rectangle bounds, Graphics2D g) throws FontFormatException, IOException;
 
     public void keyReleased(KeyEvent e) {
 

@@ -8,3 +8,6 @@
 *.jar
 *.war
 *.ear
+
+# Windows meta data
+Thumbs.db
