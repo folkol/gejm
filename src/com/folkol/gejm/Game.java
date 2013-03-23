@@ -52,7 +52,6 @@ public abstract class Game implements KeyListener {
                 vImg = gc.createCompatibleVolatileImage(imageFromFile.getWidth(), imageFromFile.getHeight());
             }
             Graphics2D g = vImg.createGraphics();
-
             g.drawImage(imageFromFile, 0, 0, null);
 
             g.dispose();
@@ -66,6 +65,7 @@ public abstract class Game implements KeyListener {
         BufferStrategy strategy = mainFrame.getBufferStrategy();
         try {
             while (running) {
+                long currentTimeMillis = System.currentTimeMillis();
                 do {
                     do {
                         Graphics graphics = strategy.getDrawGraphics();
@@ -75,6 +75,11 @@ public abstract class Game implements KeyListener {
 
                     strategy.show();
                 } while (strategy.contentsLost());
+                long elapsed = System.currentTimeMillis() - currentTimeMillis;
+                if (elapsed == 0) {
+                    elapsed = 1;
+                }
+                System.out.println("FPS: " + 1 / (elapsed / 1000.0f));
             }
         } catch (Exception e) {
             e.printStackTrace();

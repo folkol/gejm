@@ -6,6 +6,7 @@ import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.awt.image.VolatileImage;
 import java.io.IOException;
+import java.util.Random;
 
 import com.folkol.gejm.Game;
 
@@ -18,7 +19,7 @@ public class MyExampleGame extends Game {
         super.init();
         image = loadImage("resources/images/test.png");
     };
-    
+
     @Override
     protected void renderFrame(Rectangle bounds, Graphics g) throws FontFormatException, IOException {
         // Draw scene
@@ -26,8 +27,14 @@ public class MyExampleGame extends Game {
         g.fillRect(0, 0, bounds.width, bounds.height);
 
         int frame = (int) (System.currentTimeMillis() / 100 % 6);
-        g.drawImage(image, 150, 150, 200, 250, 51 * frame, 0, 51 + 51 * frame, 100, null);
-        
+        Random random = new Random();
+        for (int i = 0; i < 10000; i++) {
+            int x = random.nextInt((int) bounds.getWidth() - 50);
+            int y = random.nextInt((int) bounds.getHeight() - 100);
+            
+            g.drawImage(image, x, y, x + 50, y + 100, 51 * frame, 0, 51 + 51 * frame, 100, null);
+        }
+
         g.setColor(Color.ORANGE);
         g.drawString("Hello World!", 50, 50);
         g.drawString("This is some example text", 50, 100);
@@ -40,7 +47,7 @@ public class MyExampleGame extends Game {
     }
 
     public static void main(String[] args) {
-        
+
         MyExampleGame myExampleGame = new MyExampleGame();
         myExampleGame.init();
         myExampleGame.run();
