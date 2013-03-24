@@ -6,7 +6,6 @@ import java.awt.Graphics2D;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
-import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.awt.image.VolatileImage;
 import java.io.File;
@@ -32,7 +31,7 @@ public class Sprite {
         loadImage();
     }
 
-    public void draw(Graphics2D g, Rectangle src, Rectangle dest) {
+    public void draw(Graphics2D g, int x, int y) {
         GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
         GraphicsDevice device = env.getDefaultScreenDevice();
         GraphicsConfiguration gc = device.getDefaultConfiguration();
@@ -45,7 +44,7 @@ public class Sprite {
             // g.drawImage(image, dest.x, dest.y, dest.x + dest.width, dest.y +
             // dest.height, src.x, src.y, src.x
             // + src.width, src.y + src.height, null);
-            g.drawImage(image, dest.x, dest.y, null);
+            g.drawImage(image, x, y, null);
 
         } while (image.contentsLost());
     }
