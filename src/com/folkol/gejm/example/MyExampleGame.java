@@ -1,34 +1,54 @@
 package com.folkol.gejm.example;
 
 import java.awt.Color;
-import java.awt.FontFormatException;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Random;
 
 import com.folkol.gejm.Game;
 
 public class MyExampleGame extends Game {
 
-    private List<Animation> animations = new ArrayList<Animation>();
+    private final List<AnimatedSprite> animations = new ArrayList<AnimatedSprite>();
+    private final List<AnimatedSprite> tiles = new ArrayList<AnimatedSprite>();
 
     @Override
     public void init() {
         super.init();
-        for (int i = 0; i < 5; i++) {
-            animations.add(loadAnimation("hero"));
+        for (int i = 0; i < 1; i++) {
+            animations.add(loadAnimation("hero.png", 0, 0, 50, 100));
+        }
+
+        Random random = new Random();
+        for (int i = 0; i < 24; i++) {
+            for (int y = 0; y < 20; y++) {
+                tiles.add(loadAnimation("tiles.png", (random.nextInt(3)) * 50, 0, 50, 50));
+            }
         }
     };
 
     @Override
-    protected void renderFrame(Rectangle bounds, Graphics2D g) throws FontFormatException, IOException {
-        // Draw scene
+    protected void renderFrame(Rectangle bounds, Graphics2D g) throws IOException {
         g.setColor(Color.BLUE);
         g.fillRect(0, 0, bounds.width, bounds.height);
 
-        for (Animation a : animations) {
+        Collections.sort(animations, new Comparator<AnimatedSprite>() {
+            @Override
+            public int compare(AnimatedSprite a1, AnimatedSprite a2) {
+                return a1.y - a2.y;
+            }
+        });
+
+        for (AnimatedSprite t : tiles) {
+            t.draw(g);
+        }
+
+        for (AnimatedSprite a : animations) {
             a.update();
             a.draw(g);
         }
@@ -45,7 +65,6 @@ public class MyExampleGame extends Game {
     }
 
     public static void main(String[] args) {
-
         MyExampleGame myExampleGame = new MyExampleGame();
         myExampleGame.init();
         myExampleGame.run();
